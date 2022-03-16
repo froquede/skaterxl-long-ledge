@@ -10,10 +10,12 @@ public class WalkRandom : MonoBehaviour
     public UnityEngine.AI.NavMeshTriangulation navMeshData;
     public int count = 0;
     public Vector3 last_position;
+    public float last_distance = -1f;
     // Start is called before the first frame update
     void Start()
     {
         navmeshagent = agent.GetComponent<UnityEngine.AI.NavMeshAgent>();
+        navmeshagent.speed = Random.Range(1.5f, 2.5f);
         destination = GetRandomLocation();
         navmeshagent.SetDestination(destination);
         last_position = Vector3.zero;
@@ -24,13 +26,25 @@ public class WalkRandom : MonoBehaviour
     {
         if (count >= 24)
         {
+            Camera camera = (Camera)FindObjectOfType(typeof(Camera));
+            if (camera)
+            {
+                float d = Vector3.Distance(agent.transform.position, camera.transform.position);
+
+                if (d <= 8f && (last_distance > d || last_distance < 0f))
+                {
+                    last_distance = d;
+                    destination = GetRandomLocation();
+                }
+            }
+
             if (navmeshagent.remainingDistance <= navmeshagent.stoppingDistance)
             {
                 destination = GetRandomLocation();
             }
             else
             {
-                if (Vector3.Distance(agent.transform.position, last_position) <= 1f)
+                if (Vector3.Distance(agent.transform.position, last_position) <= .1f)
                 {
                     destination = GetRandomLocation();
                 }
